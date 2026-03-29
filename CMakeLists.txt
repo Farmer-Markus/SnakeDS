@@ -54,4 +54,9 @@ add_executable(snake src/main.cpp src/Snake.cpp src/Grid.cpp ${IMG_GENERATED})
 target_include_directories(snake PUBLIC ${IMG_INCLUDE_DIR} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(snake nds9)
 
-nds_create_rom(snake)
+nds_create_rom(snake
+    NAME "Snake DS"
+    SUBTITLE1 "V0.0.1"
+    SUBTITLE2 "By Farmer_Markus"
+    ICON ${PROJECT_SOURCE_DIR}/data/icon.bmp
+)
