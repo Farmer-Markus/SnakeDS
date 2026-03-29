@@ -1,0 +1,3 @@
+-gB8
+-p! # Do NOT export palette
+-pg palette.png # use palette of this instead
