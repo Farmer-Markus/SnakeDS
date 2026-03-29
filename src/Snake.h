@@ -45,4 +45,3 @@ private:
     Direction m_directionNew;
     bool m_shouldExpand = false;
 };
-
