@@ -11,3 +11,8 @@ cmake ..
 make
 ```
 This should build the .nds rom in a few seconds
+<br>
+<br>
+<br>
+![](.github/screenshots/snake_short.png)
+![](.github/screenshots/snake_long.png)
