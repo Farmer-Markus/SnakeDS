@@ -18,6 +18,10 @@ set(IMG_SRC
     "data/snake_body.png"
     "data/snake_tail.png"
     "data/snake_turn.png"
+    "data/background_sub.png"
+    "data/menu_palette.png"
+    "data/start_button.png"
+    "data/exit_button.png"
 )
 
 set(IMG_BIN_DIR ${CMAKE_BINARY_DIR}/include/data)
@@ -49,7 +53,12 @@ endforeach()
 
 # Build executable
 enable_language(ASM)
-add_executable(snake src/main.cpp src/Snake.cpp src/Grid.cpp ${IMG_GENERATED})
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+add_executable(snake src/main.cpp src/Snake.cpp src/Grid.cpp src/Menu.cpp ${IMG_GENERATED})
 
 target_include_directories(snake PUBLIC ${IMG_INCLUDE_DIR} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(snake nds9)
