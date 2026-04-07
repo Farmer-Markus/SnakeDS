@@ -52,6 +52,11 @@ struct Vec2D
     {
         return X == other.X && Y == other.Y;
     }
+
+    bool operator!=(const Vec2D<T>& other) const
+    {
+        return X != other.X || Y != other.Y;
+    }
 };
 
 enum class Direction : uint8_t

@@ -37,11 +37,13 @@ public:
     // Main function for input, gfx output and collision detection
     bool Tick();
 
+    void Draw() const;
+
 private:
     CollAction CheckCollisions(const SnakeBody& sb);
     // false if no space left to place apple
     bool RespawnApple(const SnakeBody& sb);
-    inline void RedrawApple();
+    inline void RedrawApple() const;
 
     // Background
     int m_bgID;

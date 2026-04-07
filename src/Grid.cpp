@@ -1,4 +1,5 @@
 #include <nds.h>
+#include <nds/arm9/sprite.h>
 #include <random>
 
 #include <Grid.h>
@@ -23,6 +24,9 @@ Grid::~Grid()
     delete m_randSeed;
     delete m_randX;
     delete m_randY;
+
+    oamFreeGfx(&oamMain, m_appleMem);
+    oamClearSprite(&oamMain, 0);
 }
 
 void Grid::Init()
@@ -60,9 +64,7 @@ void Grid::Init()
     m_randX = new std::uniform_int_distribution<>(0, GRID_WIDTH - 1);
     m_randY = new std::uniform_int_distribution<>(0, GRID_HEIGHT - 1);
 
-    m_snake->Draw();
     RespawnApple(m_snake->GetBody());
-    RedrawApple();
 }
 
 bool Grid::Tick()
@@ -112,6 +114,12 @@ bool Grid::Tick()
     return true;
 }
 
+void Grid::Draw() const
+{
+    m_snake->Draw();
+    RedrawApple();
+}
+
 CollAction Grid::CheckCollisions(const SnakeBody& sb)
 {
     const Pos head = sb.at(sb.size() - 1);
@@ -149,12 +157,11 @@ bool Grid::RespawnApple(const SnakeBody&)
     newPos.Y = (*m_randY)(*m_randSeed);
 
     m_apple = newPos;
-    RedrawApple();
 
     return true;
 }
 
-inline void Grid::RedrawApple()
+inline void Grid::RedrawApple() const
 {
     oamSet(&oamMain, 0, GRID_TO_PIX(m_apple.X), GRID_TO_PIX(m_apple.Y), 0, 0, SpriteSize_16x16,
         SpriteColorFormat_256Color, m_appleMem, -1, false, false, false, false, false);

@@ -52,16 +52,18 @@ foreach(IMG ${IMG_SRC})
 endforeach()
 
 # Build executable
-enable_language(ASM)
+enable_language(ASM) # For grit textures
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-add_executable(snake src/main.cpp src/Snake.cpp src/Grid.cpp src/Menu.cpp ${IMG_GENERATED})
+add_executable(snake src/main.cpp src/Snake.cpp src/Grid.cpp src/menu/Button.cpp src/menu/EventManager.cpp src/menu/Menu.cpp ${IMG_GENERATED})
 
 target_include_directories(snake PUBLIC ${IMG_INCLUDE_DIR} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(snake nds9)
+# All errors
+target_compile_options(snake PRIVATE -Wall -Wextra -Werror)
 
 nds_create_rom(snake
     NAME "Snake DS"

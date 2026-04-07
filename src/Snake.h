@@ -15,6 +15,7 @@ class Snake
     static constexpr int SPRITE_SIZE = 32 * 32;
 public:
     Snake(OamState *oam, const uint8_t oamSlot, const uint8_t oamMax, const uint8_t matSlot);
+    ~Snake();
     // Initializes four 32*32 sprites and 4 mats. Will NOT set palette
     void Init();
     // Set oam for each body part
@@ -29,10 +30,10 @@ public:
 private:
     inline Direction DirFromPos(const Pos start, const Pos dest) const;
 
+    OamState *m_oam;
     const uint8_t m_oamSlot;
     const uint8_t m_oamMax;
     const uint8_t m_matSlot;
-    OamState *m_oam;
     uint16_t *m_spriteMem[4];
 
     // 0 tail size is head

@@ -26,10 +26,18 @@ Snake::Snake(OamState *oam, const uint8_t oamSlot, const uint8_t oamMax, const u
 {
     // First last is head
     Pos p{1, 1};
-    Direction m_direction = Direction::O;
+    m_direction = Direction::O;
     m_body.push_back(p);
     p.X++;
     m_body.push_back(p);
+}
+
+Snake::~Snake()
+{
+    for(uint8_t i = 0; i < 4; i++)
+        oamFreeGfx(m_oam, m_spriteMem[i]);
+
+    oamClear(m_oam, m_oamSlot, m_oamSlot + m_oamMax);
 }
 
 void Snake::Init()

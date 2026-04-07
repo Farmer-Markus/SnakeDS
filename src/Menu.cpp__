@@ -1,0 +1,154 @@
+#include "Grid.h"
+#include <calico/nds/touch.h>
+#include <cstdint>
+#include <cstring>
+#include <nds.h>
+#include <nds/arm9/background.h>
+#include <nds/arm9/sprite.h>
+#include <nds/arm9/video.h>
+
+#include <Menu.h>
+
+#include <data/background-sub.h>
+#include <data/menu_palette.h>
+#include <data/start_button.h>
+#include <data/exit_button.h>
+#include <nds/dma.h>
+
+
+/*
+  Just wanted to do this fast and not to complicated (code is shit I know)
+  Tons of dublicate if statements etc.
+*/
+Menu::Menu(const MenuType type) : m_currMenu(type)
+{
+    m_gameRunning = false;
+    memset(m_buttonHovered, 0, sizeof(m_buttonHovered));
+    memset(&m_lastTouchEvent, 0, sizeof(m_lastTouchEvent));
+};
+
+void Menu::Init()
+{
+    // Setup static background
+    videoSetModeSub(MODE_0_2D);
+    vramSetBankC(VRAM_C_SUB_BG_0x06200000);
+    vramSetBankD(VRAM_D_SUB_SPRITE);
+
+    // Setup first(and only) background
+    m_bgID = bgInitSub(0, BgType_Text8bpp, BgSize_B16_256x256, 0, 1);
+    uint16_t *mem = bgGetMapPtr(m_bgID);
+    dmaCopy(background_subMap, mem, background_subMapLen);
+    mem = bgGetGfxPtr(m_bgID);
+    dmaCopy(background_subTiles, mem, background_subTilesLen);
+    dmaCopy(menu_palettePal, BG_PALETTE_SUB, menu_palettePalLen);
+
+    // Setup 2d sprite engine
+    oamInit(&oamSub, SpriteMapping_1D_32, false);
+    // +1 (forgot '0', transparent color in palette...)
+    dmaCopy(menu_palettePal, SPRITE_PALETTE_SUB + 1, menu_palettePalLen);
+
+    m_buttonMem[START] = oamAllocateGfx(&oamSub, SpriteSize_64x32, SpriteColorFormat_256Color);
+    m_buttonMem[EXIT] = oamAllocateGfx(&oamSub, SpriteSize_64x32, SpriteColorFormat_256Color);
+    dmaCopy(start_buttonTiles, m_buttonMem[START], start_buttonTilesLen);
+    dmaCopy(exit_buttonTiles, m_buttonMem[EXIT], exit_buttonTilesLen);
+
+    Draw();
+
+    // Init snake game
+    m_grid = new Grid(8);
+    m_grid->Init();
+}
+
+bool Menu::Tick()
+{
+    if(m_gameRunning && !m_grid->Tick())
+        StopGame();
+
+    TouchEvent te = GetTouchEvent();
+    if(te == m_lastTouchEvent)
+        goto end;
+
+    bool btnHovNew[BUTTONS_COUNT];
+    btnHovNew[START] = PointOnButton(te.data.px, te.data.py, START);
+    btnHovNew[EXIT] = PointOnButton(te.data.px, te.data.py, EXIT);
+    
+    if(!m_lastTouchEvent.touch && te.touch)
+    {
+        if(btnHovNew[START])
+            m_touchOrigin = START;
+        else if(btnHovNew[EXIT])
+            m_touchOrigin = EXIT;
+    }
+
+    if(m_buttonHovered[START] && !btnHovNew[START] && te.touch && m_touchOrigin == START)
+        btnHovNew[START] = true;
+    else if(m_touchOrigin == START)
+        m_buttonHovered[START] = btnHovNew[START];
+    
+    if(m_buttonHovered[EXIT] && !btnHovNew[EXIT] && te.touch && m_touchOrigin == EXIT)
+        btnHovNew[EXIT] = true;
+    else if(m_touchOrigin == EXIT)
+        m_buttonHovered[EXIT] = btnHovNew[EXIT];
+
+    if(m_buttonHovered[START] && !btnHovNew[START] && PointOnButton(te.data.px, te.data.py, START))
+        StartGame();
+
+    if(m_buttonHovered[EXIT] && !btnHovNew[EXIT] && PointOnButton(te.data.px, te.data.py, EXIT))
+        return false; // Exit snake
+    
+    memcpy(m_buttonHovered, btnHovNew, BUTTONS_COUNT * sizeof(bool));
+
+    Draw();
+
+    end: // end
+    m_lastTouchEvent = te;
+    return true;
+}
+
+void Menu::ChangeMenu(const MenuType type)
+{
+    m_currMenu = type;
+}
+
+Menu::TouchEvent Menu::GetTouchEvent()
+{
+    TouchEvent te;
+    te.touch = touchRead(&te.data);
+    return te;
+}
+
+void Menu::Draw() const
+{
+    uint8_t offset = m_buttonHovered[START] ? BUTTON_HOVER_OFFSET : 0;
+    oamSet(&oamSub, START,  BUTTON_X, START_BUTTON_Y + offset, 0, 0, SpriteSize_64x32,
+        SpriteColorFormat_256Color, m_buttonMem[START], -1, false, false, false, false, false);
+
+    offset = m_buttonHovered[EXIT] ? BUTTON_HOVER_OFFSET : 0;
+    oamSet(&oamSub, EXIT, BUTTON_X, EXIT_BUTTON_Y + offset, 0, 0, SpriteSize_64x32,
+        SpriteColorFormat_256Color, m_buttonMem[EXIT], -1, false, false, false, false, false);
+}
+
+bool Menu::PointOnButton(uint8_t pX, uint8_t pY, Buttons btn) const
+{
+    uint8_t btnY;
+    if(btn == START) btnY = START_BUTTON_Y;
+    else if(btn == EXIT) btnY = EXIT_BUTTON_Y;
+
+    bool isX = pX >= BUTTON_X && pX <= BUTTON_X + BUTTON_WIDTH;
+    bool isY = pY >= btnY && pY <= btnY + BUTTON_HEIGHT;
+
+    return isX && isY;
+}
+
+void Menu::StartGame()
+{
+    m_gameRunning = true;
+    m_grid->Draw();
+}
+
+void Menu::StopGame()
+{
+    delete m_grid;
+    m_grid = new Grid(7); // Create reset function or something similar
+    m_gameRunning = false;
+}
