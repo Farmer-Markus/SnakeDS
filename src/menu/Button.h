@@ -21,14 +21,14 @@ public:
     void Draw() const override;
 
     // Event handlers
-    bool MsgKeyDown(const KeyState keyState) override;
-    bool MsgKeyUp(const KeyState keyState) override;
+    bool MsgButtonDown(const KeyState keyState) override;
+    bool MsgButtonUp(const KeyState keyState) override;
     bool MsgTouchDown(const TouchPos touchPos) override;
     bool MsgTouchUp(const TouchPos touchPos) override;
 
     // Set callback function to be executed when button was clicked
-    inline Button& SetCallback(const OnClickCallback callback);
-    inline Button& SetClicked(const bool clicked);
+    inline Button *SetCallback(const OnClickCallback callback);
+    inline Button *SetClicked(const bool clicked);
 
     inline bool IsClicked() const;
 
@@ -49,16 +49,16 @@ private:
 };
 
 
-inline Button& Button::SetCallback(const OnClickCallback callback)
+inline Button* Button::SetCallback(const OnClickCallback callback)
 {
     m_callback = callback;
-    return *this;
+    return this;
 }
 
-inline Button& Button::SetClicked(const bool clicked)
+inline Button* Button::SetClicked(const bool clicked)
 {
     m_clicked = clicked;
-    return *this;
+    return this;
 }
 
 

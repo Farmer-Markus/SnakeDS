@@ -31,9 +31,9 @@ void EventManager::Tick()
         ev.touchPos = data.touch.pos.posPx;
 
         if(data.touchDown)
-            ev.eventType = EventType::TOUCH_DOWN;
+            ev.type = EventType::TOUCH_DOWN;
         else
-            ev.eventType = EventType::TOUCH_UP;
+            ev.type = EventType::TOUCH_UP;
 
         eventQue.push_back(ev);
     }
@@ -43,7 +43,7 @@ void EventManager::Tick()
     if(data.touchDown && m_lastData.touchDown && data.touch.pos.posPx != m_lastData.touch.pos.posPx)
     {
         Event ev{};
-        ev.eventType = EventType::TOUCH_MOVE;
+        ev.type = EventType::TOUCH_MOVE;
         ev.touchPos = data.touch.pos.posPx;
         eventQue.push_back(ev);
     }
@@ -60,7 +60,7 @@ void EventManager::Tick()
         {
             // Generate event with current state
             Event ev{};
-            ev.eventType = (data.currKeys & keyMask) ? EventType::BUTTON_DOWN : EventType::BUTTON_UP;
+            ev.type = (data.currKeys & keyMask) ? EventType::BUTTON_DOWN : EventType::BUTTON_UP;
             ev.key = keyMask;
             eventQue.push_back(ev);
         }

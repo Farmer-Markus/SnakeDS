@@ -26,7 +26,7 @@ enum EventType : uint8_t
 */
 struct Event
 {
-    EventType eventType;
+    EventType type;
 
     KeyState key;
     TouchPos touchPos;

@@ -1,5 +1,7 @@
 #include "menu/Event.h"
 #include "menu/EventManager.h"
+#include "menu/MainMenu.h"
+#include "menu/Menu.h"
 #include "menu/Texture.h"
 #include <calico/nds/touch.h>
 #include <cstdio>
@@ -15,27 +17,30 @@
 #include <data/start_button.h>
 
 
+Menu *menu;
+
 void DebugMsgCallback(const Event event)
 {
-    switch(event.key)
+    switch(event.type)
     {
-        case KEY_UP:
-            fprintf(stderr, "UP\n");
+        case BUTTON_DOWN:
+            menu->MsgButtonDown(event.key);
             break;
-
-        case KEY_LEFT:
-            fprintf(stderr, "LEFT\n");
+        case BUTTON_UP:
+            menu->MsgButtonUp(event.key);
             break;
-
-        case KEY_DOWN:
-            fprintf(stderr, "DOWN\n");
+        case TOUCH_DOWN:
+            menu->MsgTouchDown(event.touchPos);
             break;
-
-        case KEY_RIGHT:
-            fprintf(stderr, "RIGHT\n");
+        case TOUCH_UP:
+            menu->MsgTouchUp(event.touchPos);
+            break;
+        case TOUCH_MOVE:
+            menu->MsgTouchMove(event.touchPos);
             break;
     }
 }
+
 
 
 int main()
@@ -47,28 +52,14 @@ int main()
     vramSetBankD(VRAM_D_SUB_SPRITE);
     oamInit(&oamSub, SpriteMapping_1D_32, false);
 
-    dmaCopy(menu_palettePal, SPRITE_PALETTE_SUB + 1, menu_palettePalLen);
+    menu = new MainMenu();
+    EventManager ev(DebugMsgCallback);
 
-    OamTex btnTex;
-    btnTex.size = SpriteSize_64x32;
-    btnTex.colorFormat = SpriteColorFormat_256Color;
-    btnTex.tiles = reinterpret_cast<const uint8_t*>(start_buttonTiles);
-    btnTex.tilesLen = start_buttonTilesLen;
-    Button btn(&oamSub, 0, btnTex);
-
-    btn.SetX(75);
-
-    // consoleDemoInit();
-    // EventManager ev(DebugMsgCallback);
-
-
-
-    //int i = 0;
     while(pmMainLoop())
     {
         scanKeys();
 
-        btn.Draw();
+        ev.Tick();
 
         threadWaitForVBlank();
         oamUpdate(&oamMain);

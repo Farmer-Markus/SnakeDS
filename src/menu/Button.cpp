@@ -12,13 +12,13 @@ Button::Button(OamState *oam, const uint8_t oamSlot, const OamTex texture)
                 : m_oam(oam), m_oamSlot(oamSlot), m_oamTex(texture)
 {
     Show();
-    SetFocus(false);
+    SetClicked(false);
     SetX(0);
     SetY(0);
     SetSizeByTex();
     SetCallback(nullptr);
 
-    // Allocate memory on vram
+    // Allocate memory in vram
     m_oamTexMem = oamAllocateGfx(m_oam, m_oamTex.size, m_oamTex.colorFormat);
     // Copy texture data to vram
     dmaCopy(texture.tiles, m_oamTexMem, texture.size);
@@ -35,13 +35,13 @@ Button::~Button()
 void Button::Draw() const
 {
     uint16_t offset = IsClicked() ? CLICK_OFFSET : 0;
-    oamSet(m_oam, m_oamSlot, m_pos.X, m_pos.Y + offset, !IsFocused(), 0, m_oamTex.size,
+    oamSet(m_oam, m_oamSlot, m_pos.X, m_pos.Y + offset, !IsClicked(), 0, m_oamTex.size,
         m_oamTex.colorFormat, m_oamTexMem, 0, false, m_hidden, false, false, false);
 }
 
-bool Button::MsgKeyDown(const KeyState keyState)
+bool Button::MsgButtonDown(const KeyState keyState)
 {
-    if(keyState & KEY_A && IsFocused())
+    if(keyState & KEY_A && !IsClicked())
     {
         SetClicked(true);
         return true;
@@ -50,11 +50,12 @@ bool Button::MsgKeyDown(const KeyState keyState)
     return false;
 }
 
-bool Button::MsgKeyUp(const KeyState keyState)
+bool Button::MsgButtonUp(const KeyState keyState)
 {
-    if(keyState & KEY_A && IsFocused() && IsClicked())
+    if(keyState & KEY_A && IsClicked())
     {
         // When A was pressed & btn has focus && is clicked -> execute action
+        SetClicked(false);
         Callback();
         return true;
     }
@@ -66,7 +67,7 @@ bool Button::MsgTouchDown(const TouchPos touchPos)
 {
     if(PosOnButton(touchPos))
     {
-        SetFocus(true);
+        SetClicked(true);
         return true;
     }
 
@@ -75,16 +76,16 @@ bool Button::MsgTouchDown(const TouchPos touchPos)
 
 bool Button::MsgTouchUp(const TouchPos touchPos)
 {
-    if(IsFocused() && PosOnButton(touchPos))
+    if(IsClicked() && PosOnButton(touchPos))
     {
         // Execute action when pressed
         Callback();
         return true;
     }
     
-    if(IsFocused())
+    if(IsClicked())
     {
-        SetFocus(false);
+        SetClicked(false);
         return true;
     }
 
