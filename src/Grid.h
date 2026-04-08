@@ -40,7 +40,7 @@ public:
     void Draw() const;
 
 private:
-    CollAction CheckCollisions(const SnakeBody& sb);
+    CollAction CheckCollision(const SnakeBody& sb);
     // false if no space left to place apple
     bool RespawnApple(const SnakeBody& sb);
     inline void RedrawApple() const;

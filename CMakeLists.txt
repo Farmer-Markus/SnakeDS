@@ -58,7 +58,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-add_executable(snake src/main.cpp src/Snake.cpp src/Grid.cpp src/menu/Button.cpp src/menu/EventManager.cpp src/menu/Menu.cpp src/menu/MainMenu.cpp ${IMG_GENERATED})
+add_executable(snake src/main.cpp src/Snake.cpp src/Grid.cpp src/menu/Button.cpp src/menu/EventManager.cpp src/menu/Menu.cpp src/menu/MainMenu.cpp src/menu/ImageView.cpp ${IMG_GENERATED})
 
 target_include_directories(snake PUBLIC ${IMG_INCLUDE_DIR} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(snake nds9)

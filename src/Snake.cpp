@@ -24,9 +24,12 @@ static constexpr uint8_t MAT_TABLE[13] = {
 
 Snake::Snake(OamState *oam, const uint8_t oamSlot, const uint8_t oamMax, const uint8_t matSlot) : m_oam(oam), m_oamSlot(oamSlot), m_oamMax(oamMax), m_matSlot(matSlot)
 {
-    // First last is head
-    Pos p{1, 1};
+    m_shouldExpand = false;
     m_direction = Direction::O;
+    m_directionNew = Direction(-1); // no valid direction
+
+    // last is head
+    Pos p{1, 1};
     m_body.push_back(p);
     p.X++;
     m_body.push_back(p);
@@ -34,6 +37,7 @@ Snake::Snake(OamState *oam, const uint8_t oamSlot, const uint8_t oamMax, const u
 
 Snake::~Snake()
 {
+    // Free vram
     for(uint8_t i = 0; i < 4; i++)
         oamFreeGfx(m_oam, m_spriteMem[i]);
 
@@ -101,11 +105,10 @@ void Snake::Draw()
 
 void Snake::Move()
 {
-    m_direction = m_directionNew;
     // New head position
     Pos nPos = m_body[m_body.size() - 1];
 
-    switch(m_direction)
+    switch(m_directionNew)
     {
         case Direction::N:
             nPos.Y--;
@@ -127,6 +130,7 @@ void Snake::Move()
             return;
     }
 
+    m_direction = m_directionNew;
     m_body.push_back(nPos);
 
     // Do not expand over sprite limit

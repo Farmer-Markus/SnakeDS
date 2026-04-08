@@ -3,6 +3,10 @@
 #include <menu/Event.h>
 
 
+/*
+    Widget base class for menu widgets
+    'void Draw() const; Must be overwritten!
+*/
 class Widget
 {
 public:
@@ -35,11 +39,10 @@ protected:
     using Size = Vec2D<uint16_t>;
     
 
-    bool m_hidden;
-    bool m_focus;
-
     Pos m_pos;
     Size m_size;
+
+    bool m_hidden;
 };
 
 

@@ -10,6 +10,7 @@
 EventManager::EventManager(const OnEventCallback callback) : m_callback(callback)
 {
     m_lastRawData = RawData{};
+    m_lastTouchPos = TouchPos{};
 }
 
 void EventManager::Tick()

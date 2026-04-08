@@ -1,4 +1,4 @@
-#include <cstdlib>
+#include "menu/Menu.h"
 #include <memory>
 #include <nds/arm9/background.h>
 #include <nds/arm9/sprite.h>
@@ -11,19 +11,26 @@
 #include <menu/Widget.h>
 #include <menu/MainMenu.h>
 
+// Textures
 #include <data/start_button.h>
 #include <data/exit_button.h>
 #include <data/menu_palette.h>
 #include <data/background_sub.h>
 
-void ExitGame()
-{
-    std::exit(0);
-}
+#define SHOWN true
+#define HIDDEN false
 
 
-MainMenu::MainMenu()
+MainMenu::MainMenu(const Button::OnClickCallback gameStartCallback, const Button::OnClickCallback gameQuitCallback)
 {
+    // Init sub graphics system
+    videoSetModeSub(MODE_0_2D);
+    vramSetBankC(VRAM_C_SUB_BG);
+    vramSetBankD(VRAM_D_SUB_SPRITE);
+
+    oamInit(&oamSub, SpriteMapping_1D_32, false);
+
+
     // Create background
     m_bgID = bgInitSub(3, BgType_Text8bpp, BgSize_T_256x256, 0, 1);
     // Copy tiles
@@ -52,6 +59,7 @@ MainMenu::MainMenu()
     Button *btn = AddWidget(std::make_unique<Button>(&oamSub, 0, oamTex));
     btn->SetX(SCREEN_WIDTH / 2 - (btn->GetWidth() / 2));
     btn->SetY(BUTTON_START_Y);
+    btn->SetOnClickedCallback(gameStartCallback);
     btn->Draw();
 
     // Exit btn texture
@@ -61,8 +69,30 @@ MainMenu::MainMenu()
     btn = AddWidget(std::make_unique<Button>(&oamSub, 1, oamTex));
     btn->SetX(SCREEN_WIDTH / 2 - (btn->GetWidth() / 2));
     btn->SetY(BUTTON_EXIT_Y);
+    btn->SetOnClickedCallback(gameQuitCallback);
     btn->Draw();
-    btn->SetOnClickedCallback(ExitGame);
+}
+
+bool MainMenu::Show()
+{
+    if(Menu::Show() == HIDDEN)
+    {
+        bgShow(m_bgID);
+        return HIDDEN;
+    }
+
+    return SHOWN;
+}
+
+bool MainMenu::Hide()
+{
+    if(Menu::Hide() == SHOWN)
+    {
+        bgHide(m_bgID);
+        return SHOWN;
+    }
+
+    return HIDDEN;
 }
 
 Widget *MainMenu::MoveFocus(const Direction direction)

@@ -54,7 +54,7 @@ bool Button::MsgButtonUp(const Event::KeyState keyState)
 {
     if(keyState & KEY_A && IsClicked())
     {
-        // When A was pressed & btn has focus && is clicked -> execute action
+        // When A was pressed & btn is clicked -> execute action
         SetClicked(false);
         Callback();
         return true;
@@ -76,9 +76,10 @@ bool Button::MsgTouchDown(const Event::TouchPos touchPos)
 
 bool Button::MsgTouchUp(const Event::TouchPos touchPos)
 {
+    // Execute action when pressed
     if(IsClicked() && PosOnButton(touchPos))
     {
-        // Execute action when pressed
+        SetClicked(false);
         Callback();
         return true;
     }
@@ -144,8 +145,13 @@ bool Button::PosOnButton(const Vec2D<uint16_t> pos) const
     return isX && isY;
 }
 
-void Button::Callback() const
+bool Button::Callback() const
 {
-    if(m_callback != nullptr)
+    if(HasCallback())
+    {
         m_callback();
+        return true;
+    }
+
+    return false;
 }

@@ -36,7 +36,7 @@ private:
     const uint8_t m_matSlot;
     uint16_t *m_spriteMem[4];
 
-    // 0 tail size is head
+    // last entry is head
     SnakeBody m_body;
     Direction m_direction;
 

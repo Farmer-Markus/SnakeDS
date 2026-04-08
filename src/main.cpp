@@ -8,6 +8,7 @@
 #include <nds.h>
 #include <nds/arm9/console.h>
 #include <nds/arm9/sprite.h>
+#include <nds/timers.h>
 #include <nds/touch.h>
 
 #include <Grid.h>
@@ -18,9 +19,15 @@
 
 
 Menu *menu;
+Grid *grid;
 
-bool DebugMsgCallback(const Event event)
+bool appRunning;
+bool gameRunning;
+
+bool MsgCallback(const Event event)
 {
+    if(!menu) return false;
+
     switch(event.type)
     {
         case Event::Type::BUTTON_DOWN: return menu->MsgButtonDown(event.key);
@@ -33,28 +40,53 @@ bool DebugMsgCallback(const Event event)
     return false;
 }
 
+inline void StartGame()
+{
+    gameRunning = true;
+    grid = new Grid(10);
+    grid->Init();
+    menu->Hide();
+    grid->Draw();
+    // Switch to ingame menu
+}
 
+inline void QuitApp()
+{
+    appRunning = false;
+    menu->Hide();
+}
 
 int main()
 {
+    cpuStartTiming(0);
     // fatInitDefault(); could help to store data/highscore etc. #include <fat.h>
 
-    videoSetModeSub(MODE_0_2D);
-    vramSetBankC(VRAM_C_SUB_BG_0x06200000);
-    vramSetBankD(VRAM_D_SUB_SPRITE);
-    oamInit(&oamSub, SpriteMapping_1D_32, false);
+    appRunning = true;
+    gameRunning = false;
 
-    menu = new MainMenu();
-    EventManager ev(DebugMsgCallback);
 
-    while(pmMainLoop())
+    menu = new MainMenu(StartGame, QuitApp);
+    EventManager ev(MsgCallback);
+
+    while(pmMainLoop() && appRunning)
     {
         scanKeys();
 
+        // Update event manager(currently just for menus/ui)
         ev.Tick();
-
+        // Update game if running
+        if(gameRunning && !grid->Tick())
+        {
+            gameRunning = false;
+            delete grid;
+            menu->Show();
+            // Return to main menu
+        }
+            
         threadWaitForVBlank();
         oamUpdate(&oamMain);
         oamUpdate(&oamSub);
     }
+
+    delete menu;
 }

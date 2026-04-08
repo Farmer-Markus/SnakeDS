@@ -1,5 +1,8 @@
+#include <chrono>
+#include <ctime>
 #include <nds.h>
 #include <nds/arm9/sprite.h>
+#include <nds/timers.h>
 #include <random>
 
 #include <Grid.h>
@@ -16,6 +19,7 @@
 Grid::Grid(const uint8_t snakeInterval) : m_snakeInterval(snakeInterval)
 {
     m_snakeTimer = 0;
+    m_apple = Pos{};
 }
 
 Grid::~Grid()
@@ -59,8 +63,8 @@ void Grid::Init()
     dmaCopy(appleTiles, m_appleMem, appleTilesLen);
 
     // Initialize random generator
-    std::random_device dev;
-    m_randSeed = new std::mt19937(dev());
+    time_t seed = static_cast<time_t>(timerTick(0) ^ time(NULL));
+    m_randSeed = new std::mt19937(seed);
     m_randX = new std::uniform_int_distribution<>(0, GRID_WIDTH - 1);
     m_randY = new std::uniform_int_distribution<>(0, GRID_HEIGHT - 1);
 
@@ -88,7 +92,7 @@ bool Grid::Tick()
     {
         m_snake->Move();
         // Handle collisions
-        switch(CheckCollisions(m_snake->GetBody()))
+        switch(CheckCollision(m_snake->GetBody()))
         {
             case CollAction::WALL_ACTION:
             case CollAction::SELF_ACTION:
@@ -120,7 +124,7 @@ void Grid::Draw() const
     RedrawApple();
 }
 
-CollAction Grid::CheckCollisions(const SnakeBody& sb)
+CollAction Grid::CheckCollision(const SnakeBody& sb)
 {
     const Pos head = sb.at(sb.size() - 1);
     if(head == m_apple)

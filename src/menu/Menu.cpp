@@ -5,6 +5,9 @@
 #include <menu/Widget.h>
 #include <menu/Menu.h>
 
+#define SHOWN true
+#define HIDDEN false
+
 namespace
 {
     static constexpr uint8_t DEFAULT_WIDGET_RESERVE = 2;
@@ -15,6 +18,31 @@ Menu::Menu()
 {
     m_widgets.reserve(DEFAULT_WIDGET_RESERVE);
     m_focusedWidget = FOCUS_NONE;
+    m_hidden = false;
+}
+
+bool Menu::Show()
+{
+    if(IsShown())
+        return SHOWN;
+
+    m_hidden = false;
+    for(auto& widget : m_widgets)
+        widget->Show()->Draw();
+
+    return HIDDEN;
+}
+
+bool Menu::Hide()
+{
+    if(!IsShown())
+        return HIDDEN;
+
+    m_hidden = true;
+    for(auto& widget : m_widgets)
+        widget->Hide()->Draw();
+
+    return SHOWN;
 }
 
 Widget *Menu::GetWidget(const WidgetID id)
@@ -27,6 +55,9 @@ Widget *Menu::GetWidget(const WidgetID id)
 
 bool Menu::MsgButtonDown(const Event::KeyState key)
 {
+    if(!IsShown())
+        return false;
+
     // Pass event down to focused widget
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
     {
@@ -42,6 +73,9 @@ bool Menu::MsgButtonDown(const Event::KeyState key)
 
 bool Menu::MsgButtonUp(const Event::KeyState key)
 {
+    if(!IsShown())
+        return false;
+
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
     {
         if(widget->MsgButtonUp(key))
@@ -74,6 +108,9 @@ bool Menu::MsgButtonUp(const Event::KeyState key)
 // Only pass initial event to all -> next events just to focused widget
 bool Menu::MsgTouchDown(const Event::TouchPos pos)
 {
+    if(!IsShown())
+        return false;
+    
     // Inform every widget until one consumes the event
     Widget *widget;
     for(WidgetID id = 0; id < m_widgets.size(); id++)
@@ -92,22 +129,26 @@ bool Menu::MsgTouchDown(const Event::TouchPos pos)
 
 bool Menu::MsgTouchUp(const Event::TouchPos pos)
 {
-    bool retVal = false;
+    if(!IsShown())
+        return false;
+    
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
     {
         if(widget->MsgTouchUp(pos))
         {
             widget->Draw();
-            //SetFocus(FOCUS_NONE);
             return true;
         }            
     }
 
-    return retVal;
+    return false;
 }
 
 bool Menu::MsgTouchMove(const Event::TouchPos newPos)
 {
+    if(!IsShown())
+        return false;
+    
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
     {
         if(widget->MsgTouchMove(newPos))

@@ -17,6 +17,12 @@ public:
     Menu();
     virtual ~Menu() = default;
 
+    // Returns previous visibility
+    virtual bool Show();
+    // Returns previous visibility
+    virtual bool Hide();
+    virtual inline bool IsShown() const;
+
     // Event handlers
     virtual bool MsgButtonDown(const Event::KeyState key);
     virtual bool MsgButtonUp(const Event::KeyState key);
@@ -44,8 +50,15 @@ protected:
 
     WidgetID m_focusedWidget;
     std::vector<std::unique_ptr<Widget>> m_widgets;
+
+    bool m_hidden;
 };
 
+
+inline bool Menu::IsShown() const
+{
+    return !m_hidden;
+}
 
 template<typename T>
 inline T *Menu::AddWidget(std::unique_ptr<T> widget)

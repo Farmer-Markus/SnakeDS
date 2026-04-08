@@ -8,6 +8,10 @@
 #include <menu/Widget.h>
 
 
+/*
+    Simple button. Activate using touch or A key
+    Run callback on click
+*/
 class Button : public Widget
 {
 public:
@@ -38,8 +42,12 @@ private:
     // Set size for boundry checking by texture size
     void SetSizeByTex();
     bool PosOnButton(const Vec2D<uint16_t> pos) const;
-    void Callback() const;
+    // Return false if no callback set, true otherwise
+    bool Callback() const;
 
+    inline bool HasCallback() const;
+
+    
     OamState *m_oam;
     const uint8_t m_oamSlot;
 
@@ -67,4 +75,9 @@ inline Button* Button::SetClicked(const bool clicked)
 inline bool Button::IsClicked() const
 {
     return m_clicked;
+}
+
+inline bool Button::HasCallback() const
+{
+    return m_callback;
 }
