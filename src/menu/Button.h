@@ -7,32 +7,34 @@
 #include <menu/Event.h>
 #include <menu/Widget.h>
 
-typedef void (*OnClickCallback)();
-
 
 class Button : public Widget
 {
-    static constexpr uint16_t CLICK_OFFSET = 3;
-
 public:
+    using OnClickCallback = void (*)();
+
+
     Button(OamState *oam, const uint8_t oamSlot, const OamTex texture);
     ~Button();
 
     void Draw() const override;
 
     // Event handlers
-    bool MsgButtonDown(const KeyState keyState) override;
-    bool MsgButtonUp(const KeyState keyState) override;
-    bool MsgTouchDown(const TouchPos touchPos) override;
-    bool MsgTouchUp(const TouchPos touchPos) override;
+    bool MsgButtonDown(const Event::KeyState keyState) override;
+    bool MsgButtonUp(const Event::KeyState keyState) override;
+    bool MsgTouchDown(const Event::TouchPos touchPos) override;
+    bool MsgTouchUp(const Event::TouchPos touchPos) override;
 
     // Set callback function to be executed when button was clicked
-    inline Button *SetCallback(const OnClickCallback callback);
+    inline Button *SetOnClickedCallback(const OnClickCallback callback);
     inline Button *SetClicked(const bool clicked);
 
     inline bool IsClicked() const;
 
 private:
+    // Y offset used to indicate clicked state
+    static constexpr uint16_t CLICK_OFFSET = 3;
+
     // Set size for boundry checking by texture size
     void SetSizeByTex();
     bool PosOnButton(const Vec2D<uint16_t> pos) const;
@@ -49,7 +51,7 @@ private:
 };
 
 
-inline Button* Button::SetCallback(const OnClickCallback callback)
+inline Button* Button::SetOnClickedCallback(const OnClickCallback callback)
 {
     m_callback = callback;
     return this;

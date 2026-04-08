@@ -2,9 +2,6 @@
 #include <Common.h>
 #include <menu/Event.h>
 
-typedef Vec2D<uint16_t> WidgetPosition;
-typedef Vec2D<uint16_t> WidgetSize;
-
 
 class Widget
 {
@@ -14,11 +11,11 @@ public:
     virtual void Draw() const = 0;
 
     // Event handlers
-    virtual bool MsgButtonDown(const KeyState) { return false; }
-    virtual bool MsgButtonUp(const KeyState) { return false; }
-    virtual bool MsgTouchDown(const TouchPos) { return false; }
-    virtual bool MsgTouchUp(const TouchPos) { return false; }
-    virtual bool MsgTouchMove(const TouchPos) { return false; }
+    virtual bool MsgButtonDown(const Event::KeyState) { return false; }
+    virtual bool MsgButtonUp(const Event::KeyState) { return false; }
+    virtual bool MsgTouchDown(const Event::TouchPos) { return false; }
+    virtual bool MsgTouchUp(const Event::TouchPos) { return false; }
+    virtual bool MsgTouchMove(const Event::TouchPos) { return false; }
 
     virtual inline Widget *Show();
     virtual inline Widget *Hide();
@@ -34,12 +31,15 @@ public:
     virtual inline uint16_t GetHeight() const;
 
 protected:
+    using Pos = Vec2D<uint16_t>;
+    using Size = Vec2D<uint16_t>;
+    
 
     bool m_hidden;
     bool m_focus;
 
-    WidgetPosition m_pos;
-    WidgetSize m_size;
+    Pos m_pos;
+    Size m_size;
 };
 
 

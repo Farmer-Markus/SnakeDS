@@ -16,7 +16,7 @@ Button::Button(OamState *oam, const uint8_t oamSlot, const OamTex texture)
     SetX(0);
     SetY(0);
     SetSizeByTex();
-    SetCallback(nullptr);
+    SetOnClickedCallback(nullptr);
 
     // Allocate memory in vram
     m_oamTexMem = oamAllocateGfx(m_oam, m_oamTex.size, m_oamTex.colorFormat);
@@ -39,7 +39,7 @@ void Button::Draw() const
         m_oamTex.colorFormat, m_oamTexMem, 0, false, m_hidden, false, false, false);
 }
 
-bool Button::MsgButtonDown(const KeyState keyState)
+bool Button::MsgButtonDown(const Event::KeyState keyState)
 {
     if(keyState & KEY_A && !IsClicked())
     {
@@ -50,7 +50,7 @@ bool Button::MsgButtonDown(const KeyState keyState)
     return false;
 }
 
-bool Button::MsgButtonUp(const KeyState keyState)
+bool Button::MsgButtonUp(const Event::KeyState keyState)
 {
     if(keyState & KEY_A && IsClicked())
     {
@@ -63,7 +63,7 @@ bool Button::MsgButtonUp(const KeyState keyState)
     return false;
 }
 
-bool Button::MsgTouchDown(const TouchPos touchPos)
+bool Button::MsgTouchDown(const Event::TouchPos touchPos)
 {
     if(PosOnButton(touchPos))
     {
@@ -74,7 +74,7 @@ bool Button::MsgTouchDown(const TouchPos touchPos)
     return false;
 }
 
-bool Button::MsgTouchUp(const TouchPos touchPos)
+bool Button::MsgTouchUp(const Event::TouchPos touchPos)
 {
     if(IsClicked() && PosOnButton(touchPos))
     {

@@ -5,14 +5,19 @@
 #include <menu/Widget.h>
 #include <menu/Menu.h>
 
+namespace
+{
+    static constexpr uint8_t DEFAULT_WIDGET_RESERVE = 2;
+}
+
 
 Menu::Menu()
 {
-    m_widgets.reserve(2);
+    m_widgets.reserve(DEFAULT_WIDGET_RESERVE);
     m_focusedWidget = FOCUS_NONE;
 }
 
-Widget *Menu::GetWidget(const MenuWidgetID id)
+Widget *Menu::GetWidget(const WidgetID id)
 {
     if(id >= MAX_WIDGETS || id >= m_widgets.size())
         return nullptr;
@@ -20,7 +25,7 @@ Widget *Menu::GetWidget(const MenuWidgetID id)
     return m_widgets.at(id).get();
 }
 
-bool Menu::MsgButtonDown(const KeyState key)
+bool Menu::MsgButtonDown(const Event::KeyState key)
 {
     // Pass event down to focused widget
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
@@ -35,7 +40,7 @@ bool Menu::MsgButtonDown(const KeyState key)
     return false;
 }
 
-bool Menu::MsgButtonUp(const KeyState key)
+bool Menu::MsgButtonUp(const Event::KeyState key)
 {
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
     {
@@ -67,11 +72,11 @@ bool Menu::MsgButtonUp(const KeyState key)
 }
 
 // Only pass initial event to all -> next events just to focused widget
-bool Menu::MsgTouchDown(const TouchPos pos)
+bool Menu::MsgTouchDown(const Event::TouchPos pos)
 {
     // Inform every widget until one consumes the event
     Widget *widget;
-    for(MenuWidgetID id = 0; id < m_widgets.size(); id++)
+    for(WidgetID id = 0; id < m_widgets.size(); id++)
     {
         widget = GetWidget(id);
         if(widget->MsgTouchDown(pos))
@@ -85,7 +90,7 @@ bool Menu::MsgTouchDown(const TouchPos pos)
     return false;
 }
 
-bool Menu::MsgTouchUp(const TouchPos pos)
+bool Menu::MsgTouchUp(const Event::TouchPos pos)
 {
     bool retVal = false;
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
@@ -101,7 +106,7 @@ bool Menu::MsgTouchUp(const TouchPos pos)
     return retVal;
 }
 
-bool Menu::MsgTouchMove(const TouchPos newPos)
+bool Menu::MsgTouchMove(const Event::TouchPos newPos)
 {
     if(Widget *widget = GetWidgetFocused(); widget != nullptr)
     {
@@ -115,7 +120,7 @@ bool Menu::MsgTouchMove(const TouchPos newPos)
     return false;
 }
 
-Widget *Menu::SetFocus(const MenuWidgetID id)
+Widget *Menu::SetFocus(const WidgetID id)
 {
     if(id == FOCUS_NONE)
     {

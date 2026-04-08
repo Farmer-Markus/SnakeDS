@@ -19,26 +19,18 @@
 
 Menu *menu;
 
-void DebugMsgCallback(const Event event)
+bool DebugMsgCallback(const Event event)
 {
     switch(event.type)
     {
-        case BUTTON_DOWN:
-            menu->MsgButtonDown(event.key);
-            break;
-        case BUTTON_UP:
-            menu->MsgButtonUp(event.key);
-            break;
-        case TOUCH_DOWN:
-            menu->MsgTouchDown(event.touchPos);
-            break;
-        case TOUCH_UP:
-            menu->MsgTouchUp(event.touchPos);
-            break;
-        case TOUCH_MOVE:
-            menu->MsgTouchMove(event.touchPos);
-            break;
+        case Event::Type::BUTTON_DOWN: return menu->MsgButtonDown(event.key);
+        case Event::Type::BUTTON_UP: return menu->MsgButtonUp(event.key);
+        case Event::Type::TOUCH_DOWN: return menu->MsgTouchDown(event.touchPos);
+        case Event::Type::TOUCH_UP: return menu->MsgTouchUp(event.touchPos);
+        case Event::Type::TOUCH_MOVE: return menu->MsgTouchMove(event.touchPos);
     }
+
+    return false;
 }
 
 

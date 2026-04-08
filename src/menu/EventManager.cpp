@@ -1,5 +1,4 @@
 #include <calico/nds/touch.h>
-#include <cstdint>
 #include <nds/arm9/input.h>
 #include <nds/arm9/sprite.h>
 #include <vector>
@@ -10,7 +9,7 @@
 
 EventManager::EventManager(const OnEventCallback callback) : m_callback(callback)
 {
-    m_lastData = RawData{};
+    m_lastRawData = RawData{};
 }
 
 void EventManager::Tick()
@@ -18,41 +17,47 @@ void EventManager::Tick()
     // Read in newest touch/key data
     RawData data;
     data.touchDown = touchRead(&data.touch.data);
-    data.currKeys = keysCurrent();
+    data.keys = keysCurrent();
 
     // Generate events
     std::vector<Event> eventQue;
     eventQue.reserve(KEY_COUNT);
 
+    // Touchpos gets set to 0 when finger goes up
+    // but we always want touch position
+    if(!data.touchDown)
+        data.touch.pos = m_lastTouchPos;
+    else // Save new touch pos for next event
+        m_lastTouchPos = data.touch.pos;
+
     // First check touch down/up event
-    if(data.touchDown != m_lastData.touchDown)
+    if(data.touchDown != m_lastRawData.touchDown)
     {
         Event ev{};
         ev.touchPos = data.touch.pos.posPx;
 
         if(data.touchDown)
-            ev.type = EventType::TOUCH_DOWN;
+            ev.type = Event::Type::TOUCH_DOWN;
         else
-            ev.type = EventType::TOUCH_UP;
+            ev.type = Event::Type::TOUCH_UP;
 
         eventQue.push_back(ev);
     }
 
     // Then touch move event
-    // Touchpos gets set to 0 when finger goes up
-    if(data.touchDown && m_lastData.touchDown && data.touch.pos.posPx != m_lastData.touch.pos.posPx)
+    if(data.touch.pos.posPx != m_lastRawData.touch.pos.posPx)
     {
         Event ev{};
-        ev.type = EventType::TOUCH_MOVE;
+        ev.type = Event::Type::TOUCH_MOVE;
         ev.touchPos = data.touch.pos.posPx;
         eventQue.push_back(ev);
     }
 
     // Now key events
     // Get all events that have changed since last tick
-    KeyState kChanged = data.currKeys ^ m_lastData.currKeys;
-    KeyState keyMask;
-    for(uint8_t i = 0; i < KEY_COUNT; i++)
+    Event::KeyState kChanged = data.keys ^ m_lastRawData.keys;
+    Event::KeyState keyMask;
+    for(Event::KeyState i = 0; i < KEY_COUNT; i++)
     {
         keyMask = 1 << i;
         // if key changed state
@@ -60,14 +65,14 @@ void EventManager::Tick()
         {
             // Generate event with current state
             Event ev{};
-            ev.type = (data.currKeys & keyMask) ? EventType::BUTTON_DOWN : EventType::BUTTON_UP;
+            ev.type = (data.keys & keyMask) ? Event::Type::BUTTON_DOWN : Event::Type::BUTTON_UP;
             ev.key = keyMask;
             eventQue.push_back(ev);
         }
     }
 
     // Update last data for next tick
-    m_lastData = data;
+    m_lastRawData = data;
 
     // Trigger events
     for(Event ev : eventQue)
