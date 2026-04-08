@@ -9,6 +9,10 @@
 #include <menu/Button.h>
 
 
+/*
+    Base menu class
+    "Widget *MoveFocus(const Direction direction)" is recommended to be overwritten!
+*/
 class Menu
 {
 public:
@@ -31,7 +35,7 @@ public:
     virtual bool MsgTouchMove(const Event::TouchPos newPos);
 
     template<typename T>
-    inline T *AddWidget(std::unique_ptr<T> widget);
+    T *AddWidget(std::unique_ptr<T> widget);
 
 protected:
     static constexpr size_t FOCUS_NONE = 11;
@@ -42,7 +46,7 @@ protected:
     // Careful! Will get deleted with menu
     virtual Widget *GetWidget(const WidgetID id);
     // Didn't want to do a even more complicated system with custom ID's for every widget
-    virtual Widget *MoveFocus(const Direction direction) = 0;
+    virtual Widget *MoveFocus(const Direction dir);
     virtual Widget *SetFocus(const WidgetID id);
 
     virtual void DrawAll();
@@ -61,7 +65,7 @@ inline bool Menu::IsShown() const
 }
 
 template<typename T>
-inline T *Menu::AddWidget(std::unique_ptr<T> widget)
+T *Menu::AddWidget(std::unique_ptr<T> widget)
 {
     m_widgets.push_back(std::move(widget));
     return static_cast<T*>(GetWidget(m_widgets.size() - 1));

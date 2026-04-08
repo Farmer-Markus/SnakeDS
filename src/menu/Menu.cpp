@@ -45,14 +45,6 @@ bool Menu::Hide()
     return SHOWN;
 }
 
-Widget *Menu::GetWidget(const WidgetID id)
-{
-    if(id >= MAX_WIDGETS || id >= m_widgets.size())
-        return nullptr;
-
-    return m_widgets.at(id).get();
-}
-
 bool Menu::MsgButtonDown(const Event::KeyState key)
 {
     if(!IsShown())
@@ -159,6 +151,19 @@ bool Menu::MsgTouchMove(const Event::TouchPos newPos)
     }
 
     return false;
+}
+
+Widget *Menu::GetWidget(const WidgetID id)
+{
+    if(id >= MAX_WIDGETS || id >= m_widgets.size())
+        return nullptr;
+
+    return m_widgets.at(id).get();
+}
+
+Widget *Menu::MoveFocus(const Direction)
+{
+    return nullptr;
 }
 
 Widget *Menu::SetFocus(const WidgetID id)

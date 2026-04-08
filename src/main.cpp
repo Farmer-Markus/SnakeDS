@@ -10,31 +10,35 @@
 #include <nds/arm9/sprite.h>
 #include <nds/timers.h>
 #include <nds/touch.h>
+#include <menu/IngameMenu.h>
 
 #include <Grid.h>
 #include <menu/Button.h>
 
 #include <data/menu_palette.h>
 #include <data/start_button.h>
+#include <utility>
 
 
-Menu *menu;
+Menu *currMenu, *subMenu;
 Grid *grid;
 
 bool appRunning;
 bool gameRunning;
 
+void SwapMenus();
+
+
+
 bool MsgCallback(const Event event)
 {
-    if(!menu) return false;
-
     switch(event.type)
     {
-        case Event::Type::BUTTON_DOWN: return menu->MsgButtonDown(event.key);
-        case Event::Type::BUTTON_UP: return menu->MsgButtonUp(event.key);
-        case Event::Type::TOUCH_DOWN: return menu->MsgTouchDown(event.touchPos);
-        case Event::Type::TOUCH_UP: return menu->MsgTouchUp(event.touchPos);
-        case Event::Type::TOUCH_MOVE: return menu->MsgTouchMove(event.touchPos);
+        case Event::Type::BUTTON_DOWN: return currMenu->MsgButtonDown(event.key);
+        case Event::Type::BUTTON_UP: return currMenu->MsgButtonUp(event.key);
+        case Event::Type::TOUCH_DOWN: return currMenu->MsgTouchDown(event.touchPos);
+        case Event::Type::TOUCH_UP: return currMenu->MsgTouchUp(event.touchPos);
+        case Event::Type::TOUCH_MOVE: return currMenu->MsgTouchMove(event.touchPos);
     }
 
     return false;
@@ -45,15 +49,27 @@ inline void StartGame()
     gameRunning = true;
     grid = new Grid(10);
     grid->Init();
-    menu->Hide();
     grid->Draw();
-    // Switch to ingame menu
+
+    SwapMenus();
 }
 
 inline void QuitApp()
 {
     appRunning = false;
-    menu->Hide();
+    currMenu->Hide();
+}
+
+inline void UpdateScore(size_t score)
+{
+    static_cast<IngameMenu*>(currMenu)->SetScore(score);
+}
+
+void SwapMenus()
+{
+    currMenu->Hide();
+    subMenu = std::exchange(currMenu, subMenu);
+    currMenu->Show();
 }
 
 int main()
@@ -64,8 +80,18 @@ int main()
     appRunning = true;
     gameRunning = false;
 
+    // Init sub graphics system
+    videoSetModeSub(MODE_0_2D);
+    vramSetBankC(VRAM_C_SUB_BG);
+    vramSetBankD(VRAM_D_SUB_SPRITE);
 
-    menu = new MainMenu(StartGame, QuitApp);
+    oamInit(&oamSub, SpriteMapping_1D_32, false);
+
+
+    currMenu = new MainMenu(StartGame, QuitApp);
+    subMenu = new IngameMenu();
+    subMenu->Hide();
+
     EventManager ev(MsgCallback);
 
     while(pmMainLoop() && appRunning)
@@ -75,12 +101,21 @@ int main()
         // Update event manager(currently just for menus/ui)
         ev.Tick();
         // Update game if running
-        if(gameRunning && !grid->Tick())
+        if(gameRunning)
         {
-            gameRunning = false;
-            delete grid;
-            menu->Show();
-            // Return to main menu
+            if(!grid->Tick())
+            {
+                // Game ended
+                gameRunning = false;
+                delete grid;
+                currMenu->Show();
+                // Return to main menu
+                SwapMenus();
+            } else
+            {
+                // Game running
+
+            }
         }
             
         threadWaitForVBlank();
@@ -88,5 +123,6 @@ int main()
         oamUpdate(&oamSub);
     }
 
-    delete menu;
+    delete currMenu;
+    delete subMenu;
 }

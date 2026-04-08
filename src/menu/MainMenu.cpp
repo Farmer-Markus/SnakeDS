@@ -23,14 +23,6 @@
 
 MainMenu::MainMenu(const Button::OnClickCallback gameStartCallback, const Button::OnClickCallback gameQuitCallback)
 {
-    // Init sub graphics system
-    videoSetModeSub(MODE_0_2D);
-    vramSetBankC(VRAM_C_SUB_BG);
-    vramSetBankD(VRAM_D_SUB_SPRITE);
-
-    oamInit(&oamSub, SpriteMapping_1D_32, false);
-
-
     // Create background
     m_bgID = bgInitSub(3, BgType_Text8bpp, BgSize_T_256x256, 0, 1);
     // Copy tiles
