@@ -15,6 +15,7 @@ public:
 
     bool Show() override;
     bool Hide() override;
+
 private:
     static constexpr size_t BUTTON_COUNT = 2;
     static constexpr uint16_t BUTTON_START_Y = SCREEN_HEIGHT / 2;
@@ -23,5 +24,7 @@ private:
     Widget *MoveFocus(const Direction direction) override;
     inline void StartGame() const;
 
-    int m_bgID;
+    void DrawBackgrounds();
+
+    int m_bgID, m_bgInfoID;
 };

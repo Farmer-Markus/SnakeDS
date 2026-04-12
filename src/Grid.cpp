@@ -35,11 +35,6 @@ Grid::~Grid()
 
 void Grid::Init()
 {
-    // Set enough vram for background and sprites
-    videoSetMode(MODE_0_2D);
-    vramSetBankA(VRAM_A_MAIN_BG_0x06000000); // We are only using 1 background
-    vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000); // Also only 5 small different sprite textures
-
     // Allocate memory for background
     m_bgID = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 0, 1);
     m_bgMapMem = bgGetMapPtr(m_bgID);
@@ -50,8 +45,7 @@ void Grid::Init()
     dmaCopy(backgroundTiles, m_bgTileMem, backgroundTilesLen);
     dmaCopy(backgroundPal, BG_PALETTE, backgroundPalLen);
 
-    // Initialize sprite system, color palette (all sprites will use same palette)
-    oamInit(&oamMain, SpriteMapping_1D_32, false);
+    // color palette (all sprites will use same palette)
     dmaCopy(palettePal, SPRITE_PALETTE, palettePalLen);
 
     // Initialize snake. Oam slot 1 is used for apple. No mats used here so use first slot

@@ -15,7 +15,8 @@
 #include <data/start_button.h>
 #include <data/exit_button.h>
 #include <data/menu_palette.h>
-#include <data/background_sub.h>
+#include <data/background_mainmenu.h>
+#include <data/background_info.h>
 
 #define SHOWN true
 #define HIDDEN false
@@ -23,18 +24,11 @@
 
 MainMenu::MainMenu(const Button::OnClickCallback gameStartCallback, const Button::OnClickCallback gameQuitCallback)
 {
-    // Create background
-    m_bgID = bgInitSub(3, BgType_Text8bpp, BgSize_T_256x256, 0, 1);
-    // Copy tiles
-    uint16_t *bgMem = bgGetGfxPtr(m_bgID);
-    dmaCopy(background_subTiles, bgMem, background_subTilesLen);
-    // Copy map
-    bgMem = bgGetMapPtr(m_bgID);
-    dmaCopy(background_subMap, bgMem, background_subMapLen);
-    // Copy background palette
-    dmaCopy(menu_palettePal, BG_PALETTE_SUB, menu_palettePalLen);
-    bgSetPriority(m_bgID, 3);
-    
+    // Create backgrounds
+    //m_bgInfoID = bgInit(0, BgType_Text8bpp, BgSize_T_256x256, 0, 0);
+    m_bgID = bgInitSub(0, BgType_Text8bpp, BgSize_T_256x256, 0, 0);
+
+    DrawBackgrounds();
 
     // Copy Sprite palette
     dmaCopy(menu_palettePal, SPRITE_PALETTE_SUB + 1, menu_palettePalLen);
@@ -69,7 +63,9 @@ bool MainMenu::Show()
 {
     if(Menu::Show() == HIDDEN)
     {
+        DrawBackgrounds(); // In case they've got overwritten
         bgShow(m_bgID);
+        bgShow(m_bgInfoID);
         return HIDDEN;
     }
 
@@ -81,6 +77,7 @@ bool MainMenu::Hide()
     if(Menu::Hide() == SHOWN)
     {
         bgHide(m_bgID);
+        bgHide(m_bgInfoID);
         return SHOWN;
     }
 
@@ -104,4 +101,25 @@ Widget *MainMenu::MoveFocus(const Direction direction)
     }
 
     return GetWidgetFocused();
+}
+
+void MainMenu::DrawBackgrounds()
+{
+    // Top/info background
+    uint16_t *bgMem; /* = bgGetGfxPtr(m_bgInfoID);
+    dmaCopy(background_mainmenuTiles, bgMem, background_mainmenuTilesLen);
+    bgMem = bgGetMapPtr(m_bgInfoID);
+    dmaCopy(background_mainmenuMap, bgMem, background_mainmenuMapLen);
+
+    dmaCopy(background_mainmenuPal, BG_PALETTE, background_mainmenuPalLen);*/
+
+    // Copy tiles
+    bgMem = bgGetGfxPtr(m_bgID);
+    dmaCopy(background_mainmenuTiles, bgMem, background_mainmenuTilesLen);
+    // Copy map
+    bgMem = bgGetMapPtr(m_bgID);
+    dmaCopy(background_mainmenuMap, bgMem, background_mainmenuMapLen);
+    // Copy background palette
+    dmaCopy(background_mainmenuPal, BG_PALETTE_SUB, background_mainmenuPalLen);
+    bgSetPriority(m_bgID, 3);
 }

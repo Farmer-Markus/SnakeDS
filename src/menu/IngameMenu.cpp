@@ -3,8 +3,6 @@
 #include <nds/arm9/background.h>
 
 
-#include <data/menu_palette.h>
-#include <data/background_sub.h>
 
 #define SHOWN true
 #define HIDDEN false

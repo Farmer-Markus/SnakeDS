@@ -11,17 +11,20 @@ project(snake-nds)
 
 # Build textures
 set(IMG_SRC
-    "data/palette.png"
     "data/apple.png"
-    "data/background.png"
     "data/snake_head.png"
     "data/snake_body.png"
     "data/snake_tail.png"
     "data/snake_turn.png"
-    "data/background_sub.png"
-    "data/menu_palette.png"
     "data/start_button.png"
     "data/exit_button.png"
+
+    "data/palette.png"
+    "data/menu_palette.png"
+
+    "data/background.png"
+    "data/background_mainmenu.png"
+    "data/background_info.png"
 )
 
 set(IMG_BIN_DIR ${CMAKE_BINARY_DIR}/include/data)

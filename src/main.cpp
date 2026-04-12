@@ -72,6 +72,21 @@ void SwapMenus()
     currMenu->Show();
 }
 
+void InitGfx()
+{
+    videoSetMode(MODE_0_2D);
+    vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
+    vramSetBankB(VRAM_B_MAIN_SPRITE_0x06400000);
+
+    // Init sub graphics system
+    videoSetModeSub(MODE_0_2D);
+    vramSetBankC(VRAM_C_SUB_BG);
+    vramSetBankD(VRAM_D_SUB_SPRITE);
+
+    oamInit(&oamMain, SpriteMapping_1D_32, false);
+    oamInit(&oamSub, SpriteMapping_1D_32, false);
+}
+
 int main()
 {
     cpuStartTiming(0);
@@ -80,17 +95,12 @@ int main()
     appRunning = true;
     gameRunning = false;
 
-    // Init sub graphics system
-    videoSetModeSub(MODE_0_2D);
-    vramSetBankC(VRAM_C_SUB_BG);
-    vramSetBankD(VRAM_D_SUB_SPRITE);
-
-    oamInit(&oamSub, SpriteMapping_1D_32, false);
+    InitGfx();
 
 
     currMenu = new MainMenu(StartGame, QuitApp);
-    subMenu = new IngameMenu();
-    subMenu->Hide();
+    /*subMenu = new IngameMenu();
+    subMenu->Hide();*/
 
     EventManager ev(MsgCallback);
 
